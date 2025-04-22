@@ -139,6 +139,8 @@ const General: FC<GeneralProps> = ({
             || specType.toLowerCase() === 'enum'
         ) {
             setState({ ...state, [event.target.name]: event.target.value });
+        } else if (specType.toLowerCase() === 'json') {
+            specName && setState({ ...state, [specName]: event });
         }
     }
 
@@ -166,6 +168,14 @@ const General: FC<GeneralProps> = ({
             } else {
                 updateCandidates[key] = value;
             }
+            // Wrap json type with `""`
+            if (attributeSpec && attributeSpec.type.toLowerCase() === 'json') 
+                try {
+                    const parsedJson = JSON.parse(updateCandidates[key]);
+                    updateCandidates[key] = JSON.stringify(parsedJson).replace(/"/g, "'");
+                } catch (e) {
+                    console.error(e);
+                }
         });
 
         if (policyObj.name === 'modelRoundRobin' || policyObj.name === 'modelWeightedRoundRobin' || policyObj.name === 'modelFailover') {
@@ -231,6 +241,15 @@ const General: FC<GeneralProps> = ({
         } else if (previousVal !== null && previousVal !== undefined) {
             if (spec.type.toLowerCase() === 'integer') return parseInt(previousVal, 10);
             else if (spec.type.toLowerCase() === 'boolean') return (previousVal.toString() === 'true');
+            else if (spec.type.toLowerCase() === 'json') {
+                try {
+                    const jsonString = previousVal.replace(/'/g, '"');
+                    const jsonObject = JSON.parse(jsonString);
+                    return JSON.stringify(jsonObject, null, 2);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
             else return previousVal;
         } else if (spec.defaultValue !== null && spec.defaultValue !== undefined) {
             if (spec.type.toLowerCase() === 'integer') return parseInt(spec.defaultValue, 10);
@@ -468,6 +487,76 @@ const General: FC<GeneralProps> = ({
                                             )}
                                         </>
                                     )}
+                                />
+                            )}
+
+                            {/* When attribute type is json */}
+                            {spec.type.toLowerCase() === 'json' && (
+                                <FormControl
+                                variant='outlined'
+                                className={classes.formControl}
+                                error={getError(spec) !== ''}
+                                style={{ width: '100%' }}
+                            >
+                                {/* Custom Label */}
+                                <InputLabel shrink htmlFor={spec.name} style={{ marginBottom: '0.5rem' }}>
+                                    <>
+                                        {spec.displayName}
+                                        {spec.required && (
+                                            <sup className={classes.mandatoryStar}>*</sup>
+                                        )}
+                                    </>
+                                </InputLabel>
+                            
+                                {/* Monaco Editor */}
+                                <Box component='div' m={1}>
+                                    <Paper variant='outlined'>
+                                        <EditorContainer>
+                                            <Editor
+                                                height='100%'
+                                                defaultLanguage='json'
+                                                value={getValue(spec)}
+                                                onChange={(value) => onInputChange(value, spec.type, spec.name)}
+                                                theme='light'
+                                                options={{
+                                                    minimap: { enabled: false },
+                                                    lineNumbers: 'on',
+                                                    scrollBeyondLastLine: false,
+                                                    tabSize: 2,
+                                                    lineNumbersMinChars: 2,
+                                                }}
+                                            />
+                                        </EditorContainer>
+                                    </Paper>
+                                </Box>
+                            
+                                {/* Helper or Error text */}
+                                <FormHelperText>
+                                    {getError(spec) === '' ? spec.description : getError(spec)}
+                                </FormHelperText>
+                            </FormControl>
+                            )}
+
+                            {/* When attribute type is password */}
+                            {(spec.type.toLowerCase() === 'password') && (
+                                <TextField
+                                    id={spec.name}
+                                    label={(
+                                        <>
+                                            {spec.displayName}
+                                            {spec.required && (
+                                                <sup className={classes.mandatoryStar}>*</sup>
+                                            )}
+                                        </>
+                                    )}
+                                    helperText={getError(spec) === '' ? spec.description : getError(spec)}
+                                    error={getError(spec) !== ''}
+                                    variant='outlined'
+                                    name={spec.name}
+                                    type='text'
+                                    value={getValue(spec)}
+                                    onChange={(e: any) => onInputChange(e, spec.type)}
+                                    fullWidth
                                 />
                             )}
                         </Grid>
