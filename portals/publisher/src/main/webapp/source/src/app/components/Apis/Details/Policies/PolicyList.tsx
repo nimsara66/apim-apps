@@ -26,12 +26,13 @@ import Tab from '@mui/material/Tab';
 import CardContent from '@mui/material/CardContent';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@mui/material/Typography';
-import { AddCircle } from '@mui/icons-material';
+import { AddCircle, CloudDownload } from '@mui/icons-material';
 import { Button , Theme } from '@mui/material';
 import CONSTS from 'AppData/Constants';
 import type { Policy } from './Types';
 import TabPanel from './components/TabPanel';
 import CreatePolicy from './CreatePolicy';
+import ImportPolicy from './ImportPolicy';
 
 const PREFIX = 'PolicyList';
 
@@ -85,20 +86,29 @@ const PolicyList: FC<PolicyListPorps> = ({apiPolicyList, commonPolicyList, fetch
 
     const [selectedTab, setSelectedTab] = useState(0); // Request flow related tab is active by default
     const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [importDialogOpen, setImportDialogOpen] = React.useState(false);
 
     const handleAddPolicy = () => {
         setDialogOpen(true);
+    };
+
+    const handleImportPolicy = () => {
+        setImportDialogOpen(true);
     };
 
     const handleAddPolicyClose = () => {
         setDialogOpen(false);
     };
 
+    const handleImportPolicyClose = () => {
+        setImportDialogOpen(false);
+    };
+
     return (
         <StyledPaper className={classes.paperPosition}>
             <Card variant='outlined'>
                 <CardContent>
-                    <Box display='flex'>
+                    <Box display='flex' justifyContent='space-between' alignItems='center'>
                         <Typography variant='subtitle2'>
                             <FormattedMessage
                                 id='Apis.Details.Policies.PolicyList.title'
@@ -106,21 +116,38 @@ const PolicyList: FC<PolicyListPorps> = ({apiPolicyList, commonPolicyList, fetch
                             />
                         </Typography>
                         {!isChoreoConnectEnabled && (
-                            <Button
-                                onClick={handleAddPolicy}
-                                disabled={false}
-                                variant='outlined'
-                                color='primary'
-                                data-testid='add-new-api-specific-policy'
-                                size='small'
-                                className={classes.addPolicyBtn}
-                            >
-                                <AddCircle className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.Policies.PolicyList.add.new.policy'
-                                    defaultMessage='Add New Policy'
-                                />
-                            </Button>
+                            <Box display='flex' alignItems='center' gap='2px'>
+                                <Button
+                                    onClick={handleAddPolicy}
+                                    disabled={false}
+                                    variant='outlined'
+                                    color='primary'
+                                    data-testid='add-new-api-specific-policy'
+                                    size='small'
+                                    className={classes.addPolicyBtn}
+                                >
+                                    <AddCircle className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.Policies.PolicyList.add.new.policy'
+                                        defaultMessage='Add New Policy'
+                                    />
+                                </Button>
+                                <Button
+                                    onClick={handleImportPolicy}
+                                    disabled={false}
+                                    variant='outlined'
+                                    color='primary'
+                                    data-testid='import-new-api-specific-policy'
+                                    size='small'
+                                    className={classes.addPolicyBtn}
+                                >
+                                    <CloudDownload className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.Policies.PolicyList.import.new.policy'
+                                        defaultMessage='Import New Policy'
+                                    />
+                                </Button>
+                            </Box>
                         )}
                     </Box>
                     <Box>
@@ -251,6 +278,11 @@ const PolicyList: FC<PolicyListPorps> = ({apiPolicyList, commonPolicyList, fetch
             <CreatePolicy
                 dialogOpen={dialogOpen}
                 handleDialogClose={handleAddPolicyClose}
+                fetchPolicies={fetchPolicies}
+            />
+            <ImportPolicy
+                dialogOpen={importDialogOpen}
+                handleDialogClose={handleImportPolicyClose}
                 fetchPolicies={fetchPolicies}
             />
         </StyledPaper>
