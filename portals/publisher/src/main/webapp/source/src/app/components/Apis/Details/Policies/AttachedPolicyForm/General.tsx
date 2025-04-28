@@ -34,6 +34,7 @@ import {
     InputAdornment,
     IconButton,
     MenuItem,
+    Paper,
 } from '@mui/material';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
@@ -44,6 +45,7 @@ import ApiOperationContext from "../ApiOperationContext";
 import ModelRoundRobin from '../CustomPolicies/ModelRoundRobin';
 import ModelWeightedRoundRobin from '../CustomPolicies/ModelWeightedRoundRobin';
 import ModelFailover from '../CustomPolicies/ModelFailover';
+import { Editor } from '@monaco-editor/react';
 
 const PREFIX = 'General';
 
@@ -82,6 +84,15 @@ const StyledBox = styled(Box)((
     [`& .${classes.formControl}`]: {
         width: '80%',
     }
+}));
+
+const EditorContainer = styled(Box)(({ theme }) => ({
+    height: 400,
+    '& .monaco-editor': {
+        borderBottomLeftRadius: theme.shape.borderRadius,
+        borderBottomRightRadius: theme.shape.borderRadius,
+        overflow: 'hidden',
+    },
 }));
 
 interface GeneralProps {
@@ -135,7 +146,7 @@ const General: FC<GeneralProps> = ({
         return <Progress />
     }
 
-    const onInputChange = (event: any, specType: string) => {
+    const onInputChange = (event: any, specType: string, specName?: string) => {
         if (specType.toLowerCase() === 'boolean') {
             setState({ ...state, [event.target.name]: event.target.checked });
         } else if (
